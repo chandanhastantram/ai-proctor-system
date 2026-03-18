@@ -27,6 +27,12 @@ class CandidateResponse(BaseModel):
         from_attributes = True
 
 
+class CandidateUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    face_descriptor: Optional[str] = None
+
+
 # ── Session Schemas ─────────────────────────────────────────────────────────
 
 class SessionCreate(BaseModel):
@@ -93,6 +99,7 @@ class AnswerResponse(BaseModel):
     feedback: Optional[str]
     submitted_at: datetime
     time_taken_seconds: Optional[int]
+    question_text: Optional[str] = None  # Enriched in report endpoint
 
     class Config:
         from_attributes = True

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Candidate
-from schemas import CandidateCreate, CandidateResponse
+from schemas import CandidateCreate, CandidateResponse, CandidateUpdate
 
 router = APIRouter(prefix="/api/candidates", tags=["candidates"])
 
@@ -51,6 +51,28 @@ async def get_candidate(candidate_id: UUID, db: AsyncSession = Depends(get_db)):
     candidate = result.scalar_one_or_none()
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    return candidate
+
+
+@router.put("/{candidate_id}", response_model=CandidateResponse)
+async def update_candidate(
+    candidate_id: UUID, data: CandidateUpdate, db: AsyncSession = Depends(get_db)
+):
+    """Update a candidate's information."""
+    result = await db.execute(select(Candidate).where(Candidate.id == candidate_id))
+    candidate = result.scalar_one_or_none()
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found.")
+
+    if data.name is not None:
+        candidate.name = data.name
+    if data.role is not None:
+        candidate.role = data.role
+    if data.face_descriptor is not None:
+        candidate.face_descriptor = data.face_descriptor
+
+    await db.flush()
+    await db.refresh(candidate)
     return candidate
 
 

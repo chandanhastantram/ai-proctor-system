@@ -4,10 +4,19 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
+from typing import Optional
 
 from database import get_db
 from models import Violation, InterviewSession, SessionStatus
 from schemas import ViolationCreate, ViolationResponse
+
+
+# ── Inline schema for screenshot upload ────────────────────────────────────
+
+class ScreenshotUpload(BaseModel):
+    session_id: UUID
+    screenshot_b64: str  # data:image/jpeg;base64,... string
 
 router = APIRouter(prefix="/api/violations", tags=["violations"])
 
@@ -85,7 +94,7 @@ async def get_violation_summary(session_id: UUID, db: AsyncSession = Depends(get
 
     breakdown = {}
     for v in violations:
-        vtype = v.violation_type.value
+        vtype = v.violation_type.value if hasattr(v.violation_type, 'value') else v.violation_type
         if vtype not in breakdown:
             breakdown[vtype] = {"count": 0, "total_severity": 0}
         breakdown[vtype]["count"] += 1
@@ -104,3 +113,54 @@ async def get_violation_summary(session_id: UUID, db: AsyncSession = Depends(get
         "breakdown": breakdown,
         "is_terminated": session.status == SessionStatus.TERMINATED.value if session else False,
     }
+
+
+@router.post("/screenshot")
+async def upload_violation_screenshot(
+    data: ScreenshotUpload,
+    db: AsyncSession = Depends(get_db),
+):
+    """Attach a screenshot (base64 data URL) to the most recent violation of a session.
+
+    Called by the frontend when a high-severity event fires.
+    The screenshot is stored in the `screenshot_url` column of the Violation row.
+    """
+    # Validate session exists
+    sess_result = await db.execute(
+        select(InterviewSession).where(InterviewSession.id == data.session_id)
+    )
+    session = sess_result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+    # Find the most recent violation for this session
+    viol_result = await db.execute(
+        select(Violation)
+        .where(Violation.session_id == data.session_id)
+        .order_by(Violation.timestamp.desc())
+        .limit(1)
+    )
+    violation = viol_result.scalar_one_or_none()
+
+    # Validate base64 string
+    screenshot = data.screenshot_b64
+    if not screenshot.startswith("data:image/"):
+        raise HTTPException(status_code=400, detail="Invalid screenshot format. Must be a data URL.")
+
+    if violation:
+        # Attach to existing violation
+        violation.screenshot_url = screenshot
+    else:
+        # No violation yet — create a placeholder screenshot-only record
+        violation = Violation(
+            session_id=data.session_id,
+            violation_type="tab_switch",   # generic placeholder
+            description="Automatic screenshot captured on violation event.",
+            severity=1,
+            screenshot_url=screenshot,
+        )
+        db.add(violation)
+
+    await db.flush()
+    return {"status": "ok", "violation_id": str(violation.id)}
+

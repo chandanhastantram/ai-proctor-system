@@ -17,6 +17,22 @@ from services.answer_evaluator import evaluate_answer
 router = APIRouter(prefix="/api/questions", tags=["questions"])
 
 
+@router.get("/", response_model=list[QuestionResponse])
+async def list_questions(
+    category: QuestionCategory | None = None,
+    difficulty: Difficulty | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """List all questions, optionally filtered by category and/or difficulty."""
+    query = select(Question).order_by(Question.category, Question.difficulty)
+    if category:
+        query = query.where(Question.category == category.value)
+    if difficulty:
+        query = query.where(Question.difficulty == difficulty.value)
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
 @router.get("/next/{session_id}", response_model=QuestionResponse)
 async def get_next(
     session_id: UUID,

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from database import init_db
-from routers import candidates, sessions, questions, violations, reports
+from routers import candidates, sessions, questions, violations, reports, proctoring
 
 load_dotenv()
 
@@ -74,6 +74,7 @@ app.include_router(sessions.router)
 app.include_router(questions.router)
 app.include_router(violations.router)
 app.include_router(reports.router)
+app.include_router(proctoring.router)
 
 
 @app.get("/")

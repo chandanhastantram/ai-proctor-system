@@ -8,3 +8,4 @@ python-dotenv==1.0.1
 scikit-learn==1.6.1
 numpy==2.2.1
 pydantic[email]==2.10.4
+websockets==14.1
