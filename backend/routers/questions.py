@@ -54,7 +54,7 @@ async def get_next(
     answered = await db.execute(
         select(Answer.question_id).where(Answer.session_id == session_id)
     )
-    answered_ids = [str(a) for a in answered.scalars().all()]
+    answered_ids = list(answered.scalars().all())   # UUID objects — do NOT str() them
 
     # Find which bank indices have been used (by matching question text)
     asked_indices = []

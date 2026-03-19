@@ -139,6 +139,7 @@ async def proctoring_ws(websocket: WebSocket, session_id: UUID):
 
                 await db.flush()
                 await db.refresh(violation)
+                await db.commit()  # Must commit — async_session() has no auto-commit unlike get_db dep
 
                 if auto_terminated:
                     await websocket.send_json({

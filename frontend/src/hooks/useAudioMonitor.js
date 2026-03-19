@@ -124,7 +124,7 @@ export function useAudioMonitor() {
         if (rms >= VOICE_THRESHOLD) {
           aboveVoiceAt.current ??= now
           aboveWhisperAt.current = null
-          isWhispering && setIsWhispering(false)
+          whisperingRef.current && setIsWhispering(false)
           whisperingRef.current = false
 
           if (now - aboveVoiceAt.current >= SUSTAIN_DURATION && !speakingRef.current) {

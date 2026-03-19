@@ -21,8 +21,8 @@ EVENT_TYPE_MAP = {
     "looking_away":    {"type": ViolationType.LOOKING_AWAY,     "severity": 1, "description": "Candidate looking away from screen."},
     "audio_detected":  {"type": ViolationType.AUDIO_DETECTED,   "severity": 2, "description": "Suspicious audio activity detected."},
     "face_mismatch":   {"type": ViolationType.FACE_MISMATCH,    "severity": 3, "description": "Face does not match registered candidate."},
-    "copy_paste":      {"type": ViolationType.TAB_SWITCH,       "severity": 2, "description": "Copy/paste or keyboard shortcut detected."},
-    "window_blur":     {"type": ViolationType.TAB_SWITCH,       "severity": 1, "description": "Browser window lost focus."},
+    "copy_paste":      {"type": ViolationType.COPY_PASTE,       "severity": 2, "description": "Copy/paste or keyboard shortcut detected."},
+    "window_blur":     {"type": ViolationType.COPY_PASTE,       "severity": 1, "description": "Browser window lost focus."},
 }
 
 # ── Cooldowns (seconds) — prevent event spam ─────────────────────────────────

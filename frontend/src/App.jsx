@@ -11,7 +11,7 @@ const ResultsPage = lazy(() => import('./pages/ResultsPage'))
 
 // Simple loading spinner
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-vh-100 bg-[#0f1115]">
+  <div className="flex items-center justify-center min-h-screen bg-[#0f1115]">
     <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
   </div>
 )

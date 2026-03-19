@@ -38,6 +38,7 @@ export const ENDPOINTS = {
   // Violations
   VIOLATIONS: {
     LOG: `${API_BASE_URL}/api/violations/`, // POST
+    SCREENSHOT: `${API_BASE_URL}/api/violations/screenshot`, // POST
     SESSION_VIOLATIONS: (sessionId) => `${API_BASE_URL}/api/violations/session/${sessionId}`, // GET
     SESSION_SUMMARY: (sessionId) => `${API_BASE_URL}/api/violations/session/${sessionId}/summary`, // GET
   },

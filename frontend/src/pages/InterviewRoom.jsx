@@ -29,7 +29,7 @@ function useTimer(seconds, onExpire) {
         return prev - 1
       })
     }, 1000)
-  }, [seconds])
+  }, [seconds, onExpire])
 
   const stop = useCallback(() => clearInterval(intervalRef.current), [])
   useEffect(() => () => clearInterval(intervalRef.current), [])
@@ -261,6 +261,9 @@ const InterviewRoom = () => {
 
   const videoRef = useRef(null)
 
+  // Stable ref so the timer's onExpire always calls the latest handleSubmit
+  const handleSubmitRef = useRef(null)
+
   // ── Proctoring engine (all 5 channels) ────────────────────────────────────
   const {
     integrityScore, wsConnected, violations, isTerminated,
@@ -279,7 +282,7 @@ const InterviewRoom = () => {
   // ── Timer ─────────────────────────────────────────────────────────────────
   const { remaining: timeLeft, reset: resetTimer, stop: stopTimer } = useTimer(
     120,
-    useCallback(() => handleSubmit(true), [])
+    useCallback(() => handleSubmitRef.current?.(true), [])
   )
 
   // ── API helpers ───────────────────────────────────────────────────────────
@@ -302,6 +305,8 @@ const InterviewRoom = () => {
     }
   }, [sessionId, resetTimer, stopTimer])
 
+  // Keep the ref pointing at the latest handleSubmit on every render
+  // (the timer's onExpire callback reads it via handleSubmitRef.current)
   async function handleSubmit(isTimeout = false) {
     if (!question || isSubmitting) return
     setIsSubmitting(true)
@@ -320,6 +325,7 @@ const InterviewRoom = () => {
       await fetchNextQuestion()
     }
   }
+  handleSubmitRef.current = handleSubmit
 
   async function endSessionApi(action) {
     try {

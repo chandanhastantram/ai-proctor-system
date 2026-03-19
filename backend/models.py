@@ -34,6 +34,7 @@ class ViolationType(str, enum.Enum):
     TAB_SWITCH = "tab_switch"
     AUDIO_DETECTED = "audio_detected"
     FACE_MISMATCH = "face_mismatch"
+    COPY_PASTE = "copy_paste"
 
 
 class QuestionCategory(str, enum.Enum):

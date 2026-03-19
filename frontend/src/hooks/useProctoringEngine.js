@@ -46,8 +46,7 @@ async function captureScreenshot(videoEl, sessionId) {
     ctx.restore()
     const b64 = canvas.toDataURL('image/jpeg', 0.7)
 
-    await axios.post(`${ENDPOINTS.VIOLATIONS?.SCREENSHOT
-      ?? 'http://localhost:8000/api/violations/screenshot'}`, {
+    await axios.post(ENDPOINTS.VIOLATIONS.SCREENSHOT, {
       session_id: sessionId,
       screenshot_b64: b64,
     }).catch(() => {}) // non-critical — never block on screenshot
